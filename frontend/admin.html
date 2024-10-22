@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - COVID-19 Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+    <h2>Update Vaccination Status</h2>
+    <form id="vaccinationForm">
+        <input type="text" id="vaccination-region" placeholder="Region" required>
+        <input type="number" id="dosesGiven" placeholder="Doses Given" required>
+        <input type="number" id="populationVaccinated" placeholder="Population Vaccinated" required>
+        <button type="submit">Update Vaccination Status</button>
+    </form>
+    <div id="vaccination-message"></div>
+
+    <script>
+        // Handle vaccination update
+        document.getElementById('vaccinationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const region = document.getElementById('vaccination-region').value;
+            const dosesGiven = parseInt(document.getElementById('dosesGiven').value);
+            const populationVaccinated = parseInt(document.getElementById('populationVaccinated').value);
+
+            // Send POST request to update vaccination status
+            const response = await fetch('http://localhost:5001/covid/vaccination/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ region, dosesGiven, populationVaccinated })
+            });
+
+            if (!response.ok) {
+                const errorMessage = await response.json();
+                document.getElementById('vaccination-message').innerText = 'Error: ' + errorMessage.message;
+                return;
+            }
+
+            const result = await response.json();
+            document.getElementById('vaccination-message').innerText = 'Vaccination status updated successfully: ' + JSON.stringify(result);
+        });
+    </script>
+</body>
+</html>

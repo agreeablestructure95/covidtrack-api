@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVID-19 Tracker</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link your CSS file -->
+</head>
+<body>
+    <h1>COVID-19 Tracker</h1>
+    
+    <!-- Login Section -->
+    <h2>Login</h2>
+    <form id="loginForm">
+        <input type="text" id="username" placeholder="Username" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+    <div id="message"></div>
+
+    <!-- Main Application Section (Initially Hidden) -->
+    <div id="mainApp" style="display:none;">
+        <!-- Fetch COVID-19 Cases Section -->
+        <h2>Fetch COVID-19 Cases</h2>
+        <label for="region-select">Select Region:</label>
+        <select id="region-select">
+            <option value="">--Select a Region--</option>
+            <option value="Maharashtra">Maharashtra</option>
+            <option value="Kerala">Kerala</option>
+            <option value="Karnataka">Karnataka</option>
+            <option value="Tamil Nadu">Tamil Nadu</option>
+            <option value="Delhi">Delhi</option>
+        </select>
+
+        <button id="fetch-cases">Fetch COVID-19 Cases</button>
+        <div id="results"></div>
+
+        <!-- Update Vaccination Status Section -->
+        <h2>Update Vaccination Status</h2>
+        <form id="vaccinationForm">
+            <input type="text" id="vaccination-region" placeholder="Region" required>
+            <input type="number" id="dosesGiven" placeholder="Doses Given" required>
+            <input type="number" id="populationVaccinated" placeholder="Population Vaccinated" required>
+            <button type="submit">Update Vaccination Status</button>
+        </form>
+        <div id="vaccination-message"></div>
+    </div>
+
+    <script>
+        // Handle login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Implement your login logic here
+            // For demonstration, we assume a successful login
+            console.log('Logging in with', username, password);
+
+            // Show the main application after a successful login
+            document.getElementById('mainApp').style.display = 'block';
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('message').innerText = 'Login successful! Welcome!';
+        });
+
+        // Fetch COVID-19 cases
+        document.getElementById('fetch-cases').addEventListener('click', async () => {
+            const region = document.getElementById('region-select').value;
+            if (!region) {
+                alert('Please select a region!');
+                return;
+            }
+
+            // Fetch COVID-19 cases for the selected region
+            const response = await fetch(`http://localhost:5001/covid/cases/${region}`);
+            if (!response.ok) {
+                console.error('Error fetching cases:', response.statusText);
+                document.getElementById('results').innerText = 'Error fetching data. Please try again.';
+                return;
+            }
+
+            const data = await response.json();
+
+            // Display the results
+            document.getElementById('results').innerText = JSON.stringify(data, null, 2);
+        });
+
+        // Handle vaccination update
+        document.getElementById('vaccinationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const region = document.getElementById('vaccination-region').value;
+            const dosesGiven = parseInt(document.getElementById('dosesGiven').value);
+            const populationVaccinated = parseInt(document.getElementById('populationVaccinated').value);
+
+            // Send POST request to update vaccination status
+            const response = await fetch('http://localhost:5001/covid/vaccination/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ region, dosesGiven, populationVaccinated })
+            });
+
+            if (!response.ok) {
+                const errorMessage = await response.json();
+                document.getElementById('vaccination-message').innerText = 'Error: ' + errorMessage.message;
+                return;
+            }
+
+            const result = await response.json();
+            document.getElementById('vaccination-message').innerText = 'Vaccination status updated successfully: ' + JSON.stringify(result);
+        });
+    </script>
+</body>
+</html>

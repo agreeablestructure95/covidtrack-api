@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User - COVID-19 Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>User Dashboard</h1>
+    <h2>Fetch COVID-19 Cases</h2>
+    <label for="region-select">Select Region:</label>
+    <select id="region-select">
+        <option value="">--Select a Region--</option>
+        <option value="Maharashtra">Maharashtra</option>
+        <option value="Kerala">Kerala</option>
+        <option value="Karnataka">Karnataka</option>
+        <option value="Tamilnadu">Tamilnadu</option> <!-- Updated to Tamilnadu -->
+        <option value="Delhi">Delhi</option>
+    </select>
+
+    <button id="fetch-cases">Fetch COVID-19 Cases</button>
+    <div id="results"></div>
+
+    <script>
+        // Fetch COVID-19 cases
+        document.getElementById('fetch-cases').addEventListener('click', async () => {
+            const region = document.getElementById('region-select').value;
+            if (!region) {
+                alert('Please select a region!');
+                return;
+            }
+
+            console.log('Fetching cases for region:', region); // Console log for debugging
+
+            // Fetch COVID-19 cases for the selected region
+            const response = await fetch(`http://localhost:5001/covid/cases/${region}`);
+            if (!response.ok) {
+                const errorMessage = await response.text(); // Get the response text for better debugging
+                console.error('Error fetching cases:', errorMessage);
+                document.getElementById('results').innerText = 'Error fetching data: ' + errorMessage;
+                return;
+            }
+
+            const data = await response.json();
+            // Display the results
+            document.getElementById('results').innerText = JSON.stringify(data, null, 2);
+        });
+    </script>
+</body>
+</html>
